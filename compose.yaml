@@ -1,9 +1,23 @@
 services:
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:18-alpine'
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      POSTGRES_DB: imagepipe
+      POSTGRES_USER: imagepipe
+      POSTGRES_PASSWORD: imagepipe
     ports:
-      - '5432'
+      - '5432:5432'
+
+  localstack:
+    image: 'localstack/localstack:4.14.0'
+    environment:
+      # Default is 1, and with it LocalStack accepts a presigned PUT carrying the wrong
+      # Content-Type, the wrong Content-Length, or an expired signature. Every assertion about
+      # presigning would pass without proving anything.
+      S3_SKIP_SIGNATURE_VALIDATION: '0'
+    ports:
+      # Fixed on purpose. Spring Boot has no connection details factory for LocalStack, so an
+      # ephemeral host port could not be reached by any static property.
+      - '4566:4566'
+    volumes:
+      - './local/localstack-init:/etc/localstack/init/ready.d'
