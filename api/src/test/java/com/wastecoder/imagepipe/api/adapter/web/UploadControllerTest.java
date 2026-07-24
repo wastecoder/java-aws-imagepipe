@@ -80,7 +80,8 @@ class UploadControllerTest {
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE))
                 .andExpect(jsonPath("$.type").value("https://imagepipe.wastecoder.com/problems/invalid-payload"))
                 .andExpect(jsonPath("$.title").value("Invalid payload"))
-                .andExpect(jsonPath("$.violations[0].field").value("contentType"));
+                .andExpect(jsonPath("$.violations[0].field").value("contentType"))
+                .andExpect(jsonPath("$.violations[0].message").value("must not be blank"));
     }
 
     @Test
@@ -92,7 +93,8 @@ class UploadControllerTest {
                                 {"contentType":"image/png","sizeBytes":0}
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.violations[0].field").value("sizeBytes"));
+                .andExpect(jsonPath("$.violations[0].field").value("sizeBytes"))
+                .andExpect(jsonPath("$.violations[0].message").value("must be greater than 0"));
     }
 
     @Test
@@ -112,7 +114,9 @@ class UploadControllerTest {
                         .value("https://imagepipe.wastecoder.com/problems/unsupported-content-type"))
                 .andExpect(jsonPath("$.title").value("Unsupported content type"))
                 .andExpect(jsonPath("$.contentType").value("application/zip"))
-                .andExpect(jsonPath("$.allowedContentTypes").isArray());
+                .andExpect(jsonPath("$.allowedContentTypes").isArray())
+                .andExpect(jsonPath("$.allowedContentTypes[0]").value("image/jpeg"))
+                .andExpect(jsonPath("$.allowedContentTypes[1]").value("image/png"));
     }
 
     @Test
@@ -123,7 +127,9 @@ class UploadControllerTest {
 
         mockMvc.perform(post("/uploads").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
                 .andExpect(status().isUnprocessableContent())
+                .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE))
                 .andExpect(jsonPath("$.type").value("https://imagepipe.wastecoder.com/problems/image-too-large"))
+                .andExpect(jsonPath("$.title").value("Image too large"))
                 .andExpect(jsonPath("$.sizeBytes").value(20_000_000L))
                 .andExpect(jsonPath("$.maxSizeBytes").value(10_485_760L));
     }

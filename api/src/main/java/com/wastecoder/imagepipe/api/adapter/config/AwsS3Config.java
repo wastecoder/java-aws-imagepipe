@@ -39,7 +39,6 @@ public class AwsS3Config {
                     // a host that does not resolve.
                     .serviceConfiguration(S3Configuration.builder()
                             .pathStyleAccessEnabled(true)
-                            .checksumValidationEnabled(false)
                             .build());
         }
         return builder.build();
