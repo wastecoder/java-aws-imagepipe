@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.wastecoder.imagepipe.api.TestcontainersConfiguration;
 import com.wastecoder.imagepipe.api.application.port.out.ImageRepository;
 import com.wastecoder.imagepipe.api.domain.model.Image;
-import com.wastecoder.imagepipe.api.domain.model.ImageVariant;
 import com.wastecoder.imagepipe.api.fixture.ImageMother;
+import com.wastecoder.imagepipe.shared.StorageKeys;
 import com.wastecoder.imagepipe.shared.VariantSize;
 import java.util.Map;
 import java.util.Optional;
@@ -86,14 +86,12 @@ class ImageRepositoryIntegrationTest {
                  WHERE image_id = ? AND size = ?
                 """, saved.id(), VariantSize.SMALL.name());
 
-        ImageVariant expected = saved.variants().stream()
-                .filter(variant -> variant.size() == VariantSize.SMALL)
-                .findFirst()
-                .orElseThrow();
-
-        assertThat(row.get("width")).isEqualTo(expected.width());
-        assertThat(row.get("height")).isEqualTo(expected.height());
-        assertThat(row.get("s3_key")).isEqualTo(expected.storageKey());
-        assertThat(row.get("bytes")).isEqualTo(expected.bytes());
+        // Expectations are derived independently, never from `saved`. That object is the mapper's
+        // own output, so comparing against it would leave a value-level mapping bug invisible: the
+        // row and `saved` would be wrong in exactly the same way.
+        assertThat(row.get("width")).isEqualTo(VariantSize.SMALL.maxWidth());
+        assertThat(row.get("height")).isEqualTo(VariantSize.SMALL.maxWidth() / 2);
+        assertThat(row.get("s3_key")).isEqualTo(StorageKeys.derivedKey(saved.id(), VariantSize.SMALL));
+        assertThat(row.get("bytes")).isEqualTo(4_096L);
     }
 }
