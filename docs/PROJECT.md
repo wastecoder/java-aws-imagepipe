@@ -200,7 +200,7 @@ Estes são os pontos que o projeto existe para ensinar. O checklist vive em [`PR
 - [ ] Não existe senha de RDS em lugar nenhum (nem no state, nem em variável de ambiente).
 - [ ] Os secrets do repositório **não contêm `AWS_ACCESS_KEY_ID`**.
 - [ ] `terraform destroy` deixa **zero recurso faturável**.
-- [ ] `./gradlew check` verde (unit + integração Testcontainers + gates JaCoCo/Pitest).
+- [ ] `./gradlew check integrationTest pitest` verde (unit + gates JaCoCo, integração Testcontainers, mutação).
 - [ ] Pipeline do GitHub Actions verde, incluindo o smoke test pós-deploy contra a AWS real.
 
 ## 8. Restrição de custo

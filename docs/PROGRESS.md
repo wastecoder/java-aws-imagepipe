@@ -46,10 +46,28 @@ O projeto existe para ensinar estes pontos. Marque quando você conseguir **expl
 > de 6 meses do Free plan começar a correr semanas antes de existir qualquer recurso. A parte AWS virou a
 > **Fase 0b**, logo antes da Fase 3.
 
-- [ ] Monorepo Gradle (Kotlin DSL): `settings.gradle.kts` + `build.gradle.kts` raiz (Java 21, JaCoCo, Pitest), subprojetos `api`, `worker`, `shared`
-- [ ] `shared` como **kernel de domínio**: `ImageStatus`, `VariantSize`, `StorageKeys` (derivação das chaves determinísticas). O `build.gradle.kts` dele declara **zero dependências** — a regra que impede o módulo de virar lixeira
-- [ ] Esqueleto **hexagonal horizontal** em `api` e `worker`: pacotes `domain`, `application` (`port/in`, `port/out`, `usecase`, `viewmodel`) e `adapter`
-- **Critério:** `./gradlew build` verde nos três subprojetos, e o `shared` sem nenhuma dependência declarada.
+- [x] ~~Monorepo Gradle (Kotlin DSL): `settings.gradle.kts` + `build.gradle.kts` raiz (Java 21, JaCoCo, Pitest), subprojetos `api`, `worker`, `shared`~~
+  - **Base gerada pelo Spring Initializr: Spring Boot 4.1.0, Java 21, Gradle 9.5.1, `group = com.wastecoder`, pacote `com.wastecoder.imagepipe`, YAML.** A 3.5.x saiu do site — atingiu EOL em 30/06/2026. Escolhida a 4.1 e não a 4.0.7 porque a 4.0 morre em 31/12/2026, no meio da Fase 7.
+  - **Toda versão mora em `gradle/libs.versions.toml`.** Nenhum número em build file.
+  - **Config compartilhada no `build.gradle.kts` raiz, via `subprojects {}`** — toolchain 21, baseline de teste, source set `integrationTest`, JaCoCo e Pitest. O plugin do Boot **não** é aplicado na raiz: só o `api` o enxerga.
+  - **Gates por camada, não um número global:** `shared` e `domain` 95% linha / 90% branch / 90% mutação; `application` 90/85/85; `adapter` 60/50 e fora do Pitest. Um número único deixaria passar adapter coberto com domínio furado, que é o inverso do que interessa.
+  - **`check` = unit + JaCoCo, sem Docker.** `integrationTest` e `pitest` são comandos próprios. O `PROJECT.md` §7 foi corrigido para refletir isso.
+  - **Caveats:** `info.solidsoft.pitest` **1.15.0 não funciona no Gradle 9** (`Could not get unknown property 'baseDir'`); a versão boa é a **1.19.0**, que existe só no Plugin Portal — a busca do Maven Central devolve a 1.15.0 como mais recente e engana. O Boot 4.1 gerencia **JUnit Jupiter 6.0.3**, não 5.x, e o Boot 4 renomeou os starters (`spring-boot-starter-webmvc`, um `-test` por slice, `org.testcontainers:testcontainers-postgresql`).
+  - **Verificado:** `./gradlew build` verde nos três subprojetos com o Docker desligado; `./gradlew integrationTest` verde com o Docker ligado; `./gradlew pitest` verde.
+- [x] ~~`shared` como **kernel de domínio**: `ImageStatus`, `VariantSize`, `StorageKeys` (derivação das chaves determinísticas). O `build.gradle.kts` dele declara **zero dependências** — a regra que impede o módulo de virar lixeira~~
+  - **`shared/build.gradle.kts` tem uma linha só, um comentário.** O baseline de teste (JUnit 6.0.3 + AssertJ 3.27.7) é injetado pelo build raiz, então a regra é honrada ao pé da letra e o kernel ainda assim tem teste.
+  - **`ImageStatus`:** `PENDING`, `READY`, `FAILED`. **`VariantSize`:** `SMALL` 320px, `MEDIUM` 640px, `LARGE` 1280px, com `maxWidth()` e `slug()` — a largura mora no enum porque é dado de domínio.
+  - **`StorageKeys`** com `rawKey(UUID)` → `uploads/{id}`, `derivedKey(UUID, VariantSize)` → `derived/{id}/{slug}.webp`, e o inverso `uploadIdFromRawKey(String)`, de que o worker precisa na Fase 2 para correlacionar o evento do S3 com a linha do banco. A chave `raw` não carrega extensão: o `Content-Type` vai assinado na presigned URL.
+  - **O prefixo `derived/` dentro do bucket `derived` é redundante e foi mantido de propósito** — é o que a documentação especifica, e mudar depois seria migração de chave.
+  - **Caveat:** o construtor privado de `StorageKeys` precisa ter **corpo vazio**. Com um `throw new AssertionError()` dentro, o JaCoCo deixa de filtrá-lo, a linha descoberta derruba o kernel para 0.94 e o gate de 95% reprova.
+  - **Verificado:** `./gradlew :shared:check` verde; `./gradlew :shared:pitest` verde com 100% dos mutantes mortos. O gate foi provado não-vacuoso comentando um teste e vendo o build reprovar com `Rule violated`.
+- [x] ~~Esqueleto **hexagonal horizontal** em `api` e `worker`: pacotes `domain`, `application` (`port/in`, `port/out`, `usecase`, `viewmodel`) e `adapter`~~
+  - **21 `package-info.java`**, cada um com Javadoc dizendo a responsabilidade da camada. Escolhido em vez de `.gitkeep` porque compila, sobrevive ao Git e serve de âncora para ArchUnit se ele entrar depois.
+  - **Granularidade parando no primeiro nível do `adapter`.** `web/dto/request` e `persistence/entity` nascem na Fase 1, junto da primeira classe que mora neles — pacote vazio de terceiro nível é ruído, não mapa.
+  - **`ImagepipeApplication` no pacote raiz do `api`**, não em `adapter.config`: é dali que o component scan alcança tudo abaixo.
+  - **O teste de contexto do Spring virou `ImagepipeApplicationIntegrationTest`** e foi para `api/src/integrationTest/`, porque sobe um `PostgreSQLContainer`. Deixá-lo em `src/test/` faria o `./gradlew build` exigir Docker.
+  - **Verificado:** `grep -rl "springframework\|awssdk\|jakarta.persistence" shared/src worker/src` não retorna nada.
+- **Fora deste item:** ArchUnit para transformar a regra do hexágono em gate executável; fat jar do `worker` (Fase 6); pin do `postgres:latest` no `compose.yaml` (Fase 1); `infra/` (Fase 3).
 - **Em paralelo:** é aqui que cabe a passada de largura da teoria, porque esta fase e as duas seguintes não competem por atenção com a AWS. Ver `aws-estudo/aws-roteiro-de-estudo.md`.
 
 ## Fase 1 — API local, sem AWS
