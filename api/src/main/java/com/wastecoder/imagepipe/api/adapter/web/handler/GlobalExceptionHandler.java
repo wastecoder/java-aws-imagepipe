@@ -44,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(UnsupportedContentTypeException.class)
     public ProblemDetail handleUnsupportedContentType(UnsupportedContentTypeException exception) {
-        ProblemDetail problem = problem(HttpStatus.UNPROCESSABLE_ENTITY,
+        ProblemDetail problem = problem(HttpStatus.UNPROCESSABLE_CONTENT,
                 ProblemType.UNSUPPORTED_CONTENT_TYPE, exception.getMessage());
         problem.setProperty("contentType", exception.contentType());
         problem.setProperty("allowedContentTypes", exception.allowedContentTypes());
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(ImageTooLargeException.class)
     public ProblemDetail handleImageTooLarge(ImageTooLargeException exception) {
-        ProblemDetail problem = problem(HttpStatus.UNPROCESSABLE_ENTITY,
+        ProblemDetail problem = problem(HttpStatus.UNPROCESSABLE_CONTENT,
                 ProblemType.IMAGE_TOO_LARGE, exception.getMessage());
         problem.setProperty("sizeBytes", exception.sizeBytes());
         problem.setProperty("maxSizeBytes", exception.maxSizeBytes());

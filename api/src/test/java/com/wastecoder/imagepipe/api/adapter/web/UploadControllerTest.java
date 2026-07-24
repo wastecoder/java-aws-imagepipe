@@ -106,7 +106,7 @@ class UploadControllerTest {
                         .content("""
                                 {"contentType":"application/zip","sizeBytes":204813}
                                 """))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(header().string("Content-Type", MediaType.APPLICATION_PROBLEM_JSON_VALUE))
                 .andExpect(jsonPath("$.type")
                         .value("https://imagepipe.wastecoder.com/problems/unsupported-content-type"))
@@ -122,7 +122,7 @@ class UploadControllerTest {
                 .given(requestUploadUseCase).requestUpload(any());
 
         mockMvc.perform(post("/uploads").contentType(MediaType.APPLICATION_JSON).content(VALID_BODY))
-                .andExpect(status().isUnprocessableEntity())
+                .andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.type").value("https://imagepipe.wastecoder.com/problems/image-too-large"))
                 .andExpect(jsonPath("$.sizeBytes").value(20_000_000L))
                 .andExpect(jsonPath("$.maxSizeBytes").value(10_485_760L));
