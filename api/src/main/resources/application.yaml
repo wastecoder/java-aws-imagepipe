@@ -1,3 +1,21 @@
 spring:
   application:
     name: imagepipe
+
+imagepipe:
+  upload:
+    # The three formats the JDK's ImageIO reads natively, which is what phase 2 will transcode with.
+    allowed-content-types:
+      - image/jpeg
+      - image/png
+      - image/webp
+    max-size-bytes: 10485760
+    # An upload URL has no reason to outlive the user's upload dialog, and a short expiry is the
+    # cheapest mitigation for a presigned URL being a bearer token.
+    url-expiration: 5m
+  aws:
+    region: us-east-1
+    raw-bucket: imagepipe-raw
+  cdn:
+    # Phase 7 swaps this for the CloudFront distribution domain. Nothing else changes.
+    base-url: http://localhost:4566/imagepipe-derived
