@@ -77,7 +77,6 @@ class LocalStackPresignContractIntegrationTest {
                 // http://<bucket>.localhost:<port>/..., a host that does not resolve.
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
-                        .checksumValidationEnabled(false)
                         .build())
                 .build();
     }

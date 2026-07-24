@@ -1,0 +1,34 @@
+### Step 1 of 2: request an upload.
+### Note the size: it is signed, so the file you PUT next must be exactly this many bytes.
+POST http://localhost:8080/uploads
+Content-Type: application/json
+
+{
+  "contentType": "image/png",
+  "sizeBytes": 21,
+  "filename": "cat.png"
+}
+
+> {%
+    client.global.set("uploadUrl", response.body.upload.url);
+    client.global.set("uploadId", response.body.uploadId);
+    client.log("PUT the bytes to " + response.body.upload.url);
+%}
+
+### Step 2 of 2: send the bytes straight to S3. This never touches the API.
+### If this 403s here but works in curl, add the line "# @no-auto-encoding" above the PUT:
+### the IntelliJ HTTP Client percent-encodes request URLs by default, and the presigned URL is
+### already encoded.
+PUT {{uploadUrl}}
+Content-Type: image/png
+
+pretend this is a png
+
+### Negative case: the same URL with a different media type. Expect 403 SignatureDoesNotMatch.
+PUT {{uploadUrl}}
+Content-Type: image/jpeg
+
+pretend this is a png
+
+### Read the status back.
+GET http://localhost:8080/images/{{uploadId}}
