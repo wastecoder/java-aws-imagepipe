@@ -7,12 +7,16 @@ jacoco = "0.8.13"
 pitestPlugin = "1.19.0"
 pitest = "1.19.1"
 pitestJunit5 = "1.2.2"
+awsSdk = "2.49.2"
+springdoc = "3.0.3"
 
 [libraries]
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+awssdk-bom = { module = "software.amazon.awssdk:bom", version.ref = "awsSdk" }
+springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }

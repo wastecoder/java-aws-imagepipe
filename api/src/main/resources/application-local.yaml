@@ -1,0 +1,15 @@
+# Activated by bootRun. The datasource is not declared here on purpose: spring-boot-docker-compose
+# starts compose.yaml and derives it from the postgres service, which is the point of having it.
+imagepipe:
+  aws:
+    endpoint: http://localhost:4566
+    # Must be exactly "test". LocalStack runs with S3_SKIP_SIGNATURE_VALIDATION=0 and can only
+    # verify a signature produced with that key.
+    access-key: test
+    secret-key: test
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

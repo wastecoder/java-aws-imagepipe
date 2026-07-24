@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.run.BootRun
+
 plugins {
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
@@ -15,6 +17,14 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.flywaydb:flyway-database-postgresql")
 
+    // Versions come from the AWS SDK BOM, which is why the artifacts below carry none.
+    implementation(platform(libs.awssdk.bom))
+    implementation("software.amazon.awssdk:s3")
+
+    // Not developmentOnly: that keeps the jar off the compile classpath, and the first @Operation
+    // annotation would fail to compile. It is switched off by property outside the local profile.
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
@@ -31,6 +41,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-postgresql")
+    testImplementation("org.testcontainers:testcontainers-localstack")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+}
+
+// BootRun extends JavaExec, whose working directory defaults to the subproject directory. The
+// compose file lives at the repository root, and Boot resolves it against the working directory,
+// so without this the Docker Compose support silently finds nothing and starts nothing.
+tasks.named<BootRun>("bootRun") {
+    workingDir = rootProject.projectDir
+    systemProperty("spring.profiles.active", "local")
 }

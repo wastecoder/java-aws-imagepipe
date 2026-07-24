@@ -2,6 +2,7 @@ package com.wastecoder.imagepipe.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
  * Composition root of the API.
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * component scanning reaches everything below it.
  */
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class ImagepipeApplication {
 
     public static void main(String[] args) {
