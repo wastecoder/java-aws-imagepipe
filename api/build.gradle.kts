@@ -21,6 +21,10 @@ dependencies {
     implementation(platform(libs.awssdk.bom))
     implementation("software.amazon.awssdk:s3")
 
+    // Not developmentOnly: that keeps the jar off the compile classpath, and the first @Operation
+    // annotation would fail to compile. It is switched off by property outside the local profile.
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
+
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 

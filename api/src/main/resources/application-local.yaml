@@ -7,3 +7,9 @@ imagepipe:
     # verify a signature produced with that key.
     access-key: test
     secret-key: test
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

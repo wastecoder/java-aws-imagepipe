@@ -19,3 +19,9 @@ imagepipe:
   cdn:
     # Phase 7 swaps this for the CloudFront distribution domain. Nothing else changes.
     base-url: http://localhost:4566/imagepipe-derived
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
