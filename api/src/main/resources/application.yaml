@@ -1,6 +1,14 @@
 spring:
   application:
     name: imagepipe
+  jpa:
+    # The schema is a cross-module contract: Flyway owns it and the Phase 2 worker reads it over
+    # plain JDBC. Validating the JPA mapping against the real tables at startup is a free drift
+    # detector for exactly the kind of mismatch no unit test can see.
+    hibernate:
+      ddl-auto: validate
+    # Nothing needs it: the only collection is EAGER, and leaving it on logs a WARN every startup.
+    open-in-view: false
 
 imagepipe:
   upload:

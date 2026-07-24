@@ -3,6 +3,8 @@ package com.wastecoder.imagepipe.api.adapter.config;
 import com.wastecoder.imagepipe.api.adapter.storage.S3PresignedUrlGenerator;
 import com.wastecoder.imagepipe.api.application.port.out.PresignedUrlGenerator;
 import java.net.URI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -16,6 +18,8 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration(proxyBeanMethods = false)
 public class AwsS3Config {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AwsS3Config.class);
 
     /**
      * One presigner per application. It is annotated thread safe and immutable, and its own javadoc
@@ -57,6 +61,9 @@ public class AwsS3Config {
      */
     private static AwsCredentialsProvider credentialsProvider(ImagepipeProperties.Aws aws) {
         if (StringUtils.hasText(aws.accessKey())) {
+            LOG.warn("Using static AWS credentials (imagepipe.aws.access-key is set). "
+                    + "Expected only for local development against LocalStack; on ECS this should "
+                    + "never happen, since the task role is meant to provide credentials instead.");
             return StaticCredentialsProvider.create(
                     AwsBasicCredentials.create(aws.accessKey(), aws.secretKey()));
         }

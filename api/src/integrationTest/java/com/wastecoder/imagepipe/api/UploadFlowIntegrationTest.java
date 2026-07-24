@@ -1,6 +1,8 @@
 package com.wastecoder.imagepipe.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -93,8 +95,8 @@ class UploadFlowIntegrationTest {
     }
 
     @Test
-    @DisplayName("Given an unsupported content type, when requesting an upload, then nothing is stored")
-    void refusesAnUnsupportedContentTypeBeforeStoringAnything() throws Exception {
+    @DisplayName("Given an unsupported content type, when requesting an upload, then it returns 422 as problem details")
+    void returnsAProblemDetailForAnUnsupportedContentType() throws Exception {
         mockMvc.perform(post("/uploads")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -115,8 +117,7 @@ class UploadFlowIntegrationTest {
                 .andExpect(jsonPath("$.status").value("READY"))
                 .andExpect(jsonPath("$.variants.length()").value(3))
                 .andExpect(jsonPath("$.variants[?(@.size == 'SMALL')].url")
-                        .value(org.hamcrest.Matchers.hasItem(
-                                org.hamcrest.Matchers.endsWith("/derived/" + stored.id() + "/small.webp"))));
+                        .value(hasItem(endsWith("/derived/" + stored.id() + "/small.webp"))));
     }
 
     @Test

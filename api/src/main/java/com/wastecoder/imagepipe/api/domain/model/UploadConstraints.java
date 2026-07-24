@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
  * What this deployment accepts for upload.
  *
  * <p>The values are configuration — they change per environment and should not need a recompile.
- * The rule is not: refusing an unsupported type is a domain decision, and it is what raises the
- * domain exceptions. Keeping it here makes it testable without Spring and puts it under the domain
- * coverage gate, which is where a rule this load-bearing belongs.
+ * The rule is not configuration: refusing an unsupported type is a domain decision, and it is what
+ * raises the domain exceptions. Keeping it here makes it testable without Spring and puts it under
+ * the domain coverage gate, which is where a rule this load-bearing belongs.
  */
 public record UploadConstraints(Set<String> allowedContentTypes, long maxSizeBytes) {
 

@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 import com.wastecoder.imagepipe.api.application.port.out.PresignedUpload;
+import com.wastecoder.imagepipe.shared.StorageKeys;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -15,6 +17,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -84,6 +87,25 @@ class S3PresignedUrlGeneratorTest {
         givenSignedHeaders(Map.of("host", List.of("imagepipe-raw.s3.amazonaws.com")));
 
         assertThat(generator().generate(UPLOAD_ID, "image/png", 1L).requiredHeaders()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Given an upload, when generating, then the signed request carries the configured duration and key")
+    void signsTheConfiguredDurationBucketAndKey() {
+        givenSignedHeaders(Map.of("host", List.of("imagepipe-raw.s3.amazonaws.com")));
+
+        generator().generate(UPLOAD_ID, "image/png", 204_813L);
+
+        ArgumentCaptor<PutObjectPresignRequest> presignRequest =
+                ArgumentCaptor.forClass(PutObjectPresignRequest.class);
+        verify(presigner).presignPutObject(presignRequest.capture());
+
+        PutObjectPresignRequest captured = presignRequest.getValue();
+        assertThat(captured.signatureDuration()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(captured.putObjectRequest().bucket()).isEqualTo("imagepipe-raw");
+        assertThat(captured.putObjectRequest().key()).isEqualTo(StorageKeys.rawKey(UPLOAD_ID));
+        assertThat(captured.putObjectRequest().contentType()).isEqualTo("image/png");
+        assertThat(captured.putObjectRequest().contentLength()).isEqualTo(204_813L);
     }
 
     private void givenSignedHeaders(Map<String, List<String>> signedHeaders) {

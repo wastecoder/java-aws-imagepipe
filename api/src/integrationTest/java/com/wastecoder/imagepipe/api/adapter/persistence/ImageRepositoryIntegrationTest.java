@@ -42,9 +42,7 @@ class ImageRepositoryIntegrationTest {
 
         Optional<Image> found = imageRepository.findById(saved.id());
 
-        assertThat(found).get()
-                .extracting(Image::variants, org.assertj.core.api.InstanceOfAssertFactories.LIST)
-                .hasSize(3);
+        assertThat(found).get().usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(saved);
     }
 
     @Test

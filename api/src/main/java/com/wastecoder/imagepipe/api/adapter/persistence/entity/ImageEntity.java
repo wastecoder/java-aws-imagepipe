@@ -55,6 +55,13 @@ public class ImageEntity {
     /**
      * Eager on purpose: there are at most three rows, GET /images/{id} always wants them, and lazy
      * loading here would only buy a LazyInitializationException outside the transaction.
+     *
+     * <p>A {@link List} under {@code @ElementCollection} with no {@code @OrderColumn} is a Hibernate
+     * bag: it has no index column of its own, so an update deletes every row of the collection and
+     * reinserts it, rather than diffing element by element. That is acceptable here only because this
+     * API never updates variants once written — the Phase 2 worker writes them over plain JDBC,
+     * outside Hibernate entirely, so the delete-and-reinsert path never actually runs against this
+     * table in production.
      */
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "image_variants", joinColumns = @JoinColumn(name = "image_id"))

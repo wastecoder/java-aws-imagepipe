@@ -24,6 +24,11 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
  * <p>The limit is worth stating plainly: this is an exact-size lock, never a ceiling. SigV4 only
  * matches exactly, so there is no way to express a range with a presigned PUT — that needs a POST
  * policy with content-length-range, which the AWS SDK for Java v2 cannot generate.
+ *
+ * <p>The other limit, equally worth stating: the signed Content-Type constrains the header, never
+ * the bytes. S3 does not inspect the body, so a signed {@code image/png} can be a ZIP, a
+ * decompression bomb, or an SVG carrying script. The worker must verify magic bytes itself and
+ * treat a mismatch as a permanent failure.
  */
 public class S3PresignedUrlGenerator implements PresignedUrlGenerator {
 
