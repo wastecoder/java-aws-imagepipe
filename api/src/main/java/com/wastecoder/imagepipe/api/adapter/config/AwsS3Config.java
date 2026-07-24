@@ -60,6 +60,7 @@ public class AwsS3Config {
             return StaticCredentialsProvider.create(
                     AwsBasicCredentials.create(aws.accessKey(), aws.secretKey()));
         }
-        return DefaultCredentialsProvider.create();
+        // builder().build() rather than create(): the latter is deprecated in the SDK.
+        return DefaultCredentialsProvider.builder().build();
     }
 }
