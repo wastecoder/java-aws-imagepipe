@@ -2,7 +2,7 @@
 
 Pipeline de processamento de imagens orientado a eventos, com upload via URL pré-assinada,
 geração assíncrona de variantes e distribuição via CDN.
-> **Status:** Em desenvolvimento. O projeto ainda não está concluído. Acompanhe o progresso e as próximas etapas em [`docs/PROGRESS.md`](docs/PROGRESS.md).
+> **Status:** Em desenvolvimento. O projeto ainda não está concluído. Acompanhe o progresso e as próximas etapas em [`docs/PROGRESS.md`](PROGRESS.md).
 
 ---
 
